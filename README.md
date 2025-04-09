@@ -1,9 +1,11 @@
 # CC_matching
-A CC-based point cloud library 
+A CC-based point cloud tools 
 
 ### Usage (Model)
 
-use 1.pcd & 2.pcd with standard.pcd as 
+use 1.pcd & 2.pcd with standard.pcd as sample.
+
+before runing python, please generate .txt file from CloudCompare with manual alignment.
 
 generate first matrix
 ```
