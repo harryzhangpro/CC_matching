@@ -1,0 +1,3 @@
+*.npy
+combined_registered_cloud.pcd
+combined_cloud_from_matrix.pcd
