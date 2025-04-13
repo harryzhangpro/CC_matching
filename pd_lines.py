@@ -136,37 +136,6 @@ def estimate_box_from_planes(equations, pcd=None):
 
     return mesh
 
-    corners = []
-    for a in box_planes[0]:
-        for b in box_planes[1]:
-            for c in box_planes[2]:
-                pt = intersect_three_planes(a, b, c)
-                if pt is not None:
-                    corners.append(pt)
-
-    if len(corners) != 8:
-        print("⚠️ 未能找到完整的 8 个角点")
-        return None
-
-    mesh = o3d.geometry.LineSet()
-    mesh.points = o3d.utility.Vector3dVector(np.array(corners))
-    lines = [
-        [0,1], [0,2], [0,4],
-        [1,3], [1,5],
-        [2,3], [2,6],
-        [3,7],
-        [4,5], [4,6],
-        [5,7],
-        [6,7]
-    ]
-    mesh.lines = o3d.utility.Vector2iVector(lines)
-    mesh.paint_uniform_color([1, 0, 1])
-
-    extents = np.ptp(np.array(corners), axis=0)
-    print(f"→ Box 外接尺寸: {extents[0]:.4f} x {extents[1]:.4f} x {extents[2]:.4f} 米")
-
-    return mesh
-
 def intersect_three_planes(p1, p2, p3, tol=1e-3):
     """
     三平面近似交点（最小二乘），避免共面或数值不稳定报错
@@ -203,7 +172,9 @@ def apply_and_combine(source_path, target_path, matrix_file="transformation_matr
 
     return combined_file
 
-def main(file_path=None, source_file=None, target_file=None, max_planes=6, threshold=0.01):
+def main(file_path=None, source_file=None, target_file=None,
+         max_planes=6, threshold=0.01,
+         nb_neighbors=30, std_ratio=1.0):  # NEW: 加入默认滤波参数
 
     if source_file and target_file:
         file_path = apply_and_combine(source_file, target_file)
@@ -216,6 +187,11 @@ def main(file_path=None, source_file=None, target_file=None, max_planes=6, thres
     
     pcd = read_point_cloud_auto(file_path)
     print(f"读取点云: {file_path}，共 {np.asarray(pcd.points).shape[0]} 个点")
+
+    # NEW: 统计滤波，去除孤立点（飞点）
+    print("[INFO] 执行统计离群点移除...")
+    pcd, ind = pcd.remove_statistical_outlier(nb_neighbors=nb_neighbors, std_ratio=std_ratio)
+    print(f"[INFO] 剩余点数: {len(pcd.points)}")
 
     pcd = color_point_cloud_by_z_gray(pcd)
 
@@ -235,10 +211,14 @@ if __name__ == "__main__":
     parser.add_argument("--max_planes", type=int, default=6, help="最大提取平面数量")
     parser.add_argument("--threshold", type=float, default=0.05, help="平面提取距离阈值")
     parser.add_argument("--file", type=str, help="输入单个点云文件（.ply 或 .pcd）")
+    parser.add_argument("--nb_neighbors", type=int, default=50, help="统计滤波的邻居数")
+    parser.add_argument("--std_ratio", type=float, default=0.05, help="统计滤波的标准差比例")
     args = parser.parse_args()
 
     main(file_path=args.file,
-        source_file=args.pair[0] if args.pair else None,
-        target_file=args.pair[1] if args.pair else None,
-        max_planes=args.max_planes,
-        threshold=args.threshold)
+     source_file=args.pair[0] if args.pair else None,
+     target_file=args.pair[1] if args.pair else None,
+     max_planes=args.max_planes,
+     threshold=args.threshold,
+     nb_neighbors=args.nb_neighbors,      # NEW
+     std_ratio=args.std_ratio)            # NEW
