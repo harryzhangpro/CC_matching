@@ -232,7 +232,7 @@ def main(file_path=None, source_file=None, target_file=None, max_planes=6, thres
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="点云包围盒拟合（基于多个提取面）")
     parser.add_argument("--pair", nargs=2, metavar=('SOURCE', 'TARGET'), help="输入一对点云文件用于配准")
-    parser.add_argument("--max_planes", type=int, default=4, help="最大提取平面数量")
+    parser.add_argument("--max_planes", type=int, default=6, help="最大提取平面数量")
     parser.add_argument("--threshold", type=float, default=0.05, help="平面提取距离阈值")
     parser.add_argument("--file", type=str, help="输入单个点云文件（.ply 或 .pcd）")
     args = parser.parse_args()

@@ -1,3 +1,4 @@
 *.npy
+.DS_Store
 combined_registered_cloud.pcd
 combined_cloud_from_matrix.pcd

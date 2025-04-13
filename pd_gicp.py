@@ -26,7 +26,7 @@ def preprocess_point_cloud(pcd, voxel_size):
     )
     return pcd_down
 
-def run_gicp(source_path, target_path, init_transform_path=None, voxel_size=0.1, max_iter=10000):
+def run_gicp(source_path, target_path, init_transform_path=None, voxel_size=0.3, max_iter=10000):
     print("[INFO] Loading point clouds...")
     source = o3d.io.read_point_cloud(source_path)
     target = o3d.io.read_point_cloud(target_path)
